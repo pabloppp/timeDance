@@ -16,7 +16,9 @@ public class teSocket : MonoBehaviour {
 			args.Add("msg", "what's up?");
 			socket.Emit("SEND", args);
 		});
-
+		socket.Error+=(sender, e) => {
+			Debug.Log("Error "+ e.Message.ToString());
+		};
 		socket.Connect();
 	}
 	
