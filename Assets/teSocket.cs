@@ -12,9 +12,12 @@ public class teSocket : MonoBehaviour {
 		socket.On("connect", (fn) => {
 			Debug.Log ("connect - socket");
 			
-			Dictionary<string, string> args = new Dictionary<string, string>();
-			args.Add("msg", "what's up?");
+			//Dictionary<string, string> args = new Dictionary<string, string>();
+			List<string> args = new List<string>();
+			args.Add("what's up?");
 			socket.Emit("SEND", args);
+			string valueout;
+			//args.TryGetValue("msg", out valueout);
 		});
 		socket.Error+=(sender, e) => {
 			Debug.Log("Error "+ e.Message.ToString());
