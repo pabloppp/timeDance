@@ -1,0 +1,19 @@
+{
+  "name": "Skoala",
+  "version": "0.0.1",
+  "description": "timeDance",
+  "main": "server.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "The Super Toys",
+  "license": "ISC",
+  "engines": {
+    "node": "0.10.x",
+    "npm": "1.2.x"
+  },
+  "dependencies": {
+    "express": "latest",
+    "socket.io": "0.9.16"
+  }
+}
