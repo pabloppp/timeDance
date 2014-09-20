@@ -20,10 +20,16 @@ public class songManager : MonoBehaviour {
 	public float songStartDelay = 0;
 	public float songStartDataDelay = -200;
 	public int score = 0;
+	private int contadorCombo = 0;
+	public int iniciaCombo = 10;
+	private bool comboOn = false;
 
 	public int scoreOK = 500;
+	public int scoreOKCombo = 500;
 	public int scoreGOOD = 1000;
+	public int scoreGOODCombo = 1000;
 	public int scorePERFECT = 2000;
+	public int scorePERFECTCombo = 2000;
 	public int scoreMISS = 5000;
 	public int scoreWRONG = 1000;
 
@@ -39,6 +45,7 @@ public class songManager : MonoBehaviour {
 	public Text perfect;
 	public Text missed;
 	public Text wrong;
+	public Text combo_10;
 
 	private GameObject[] arrows = new GameObject[4];
 	private GameObject[] arrowsMove = new GameObject[4];
@@ -118,6 +125,7 @@ public class songManager : MonoBehaviour {
 		perfect.enabled = false;
 		missed.enabled = false;
 		wrong.enabled = false;
+		combo_10.enabled = false;
 
 	}
 	
@@ -130,9 +138,8 @@ public class songManager : MonoBehaviour {
 			audioSource.Play ();
 		}
 
-		if (audioSource.isPlaying)
-						currentTime = audioSource.time * 1000; // in milliseconds
-		//Debug.Log (currentTime);
+		if (audioSource.isPlaying) currentTime = audioSource.time * 1000; // in milliseconds
+
 
 		if(notesPreSpawn.Count > 0){
 			string[] data = notesPreSpawn[0].Split(',');
@@ -143,7 +150,19 @@ public class songManager : MonoBehaviour {
 		for(int i = notesPostSpawn.Count-1; i >= 0; i--) arrowCheck(i);
 
 		checkKeyPress ();
+		checkCombo();
 
+		
+		
+	}
+
+	void checkCombo(){
+		if(contadorCombo >= iniciaCombo){
+			comboOn = true;
+		}
+		else{
+			comboOn = false;
+		}
 	}
 
 	void arrowSpawner(string[] data){
@@ -173,14 +192,12 @@ public class songManager : MonoBehaviour {
 
 		string[] data = notesPostSpawn[key].Split(',');
 		int offset = int.Parse(data[0]);
-		/*for(int i = 0; i < 4; i++){
-			arrows[i].renderer.enabled = true;
-		}*/
+
 
 		if (currentTime >= offset - beforeInterval && currentTime < offset + afterInterval) {
 			for(int i = 1; i<data.Length; i++){
 				int direction = int.Parse(data[i])-1;
-				//arrows[direction].renderer.enabled = false;
+
 				if(direction == 0){
 					pressLeft = true;
 					if(Input.GetKeyDown(KeyCode.LeftArrow)){
@@ -218,37 +235,37 @@ public class songManager : MonoBehaviour {
 		}
 		else if (currentTime > offset + afterInterval) {
 			destroySpawned(key, 1000, false);
+			contadorCombo = 0;
 			score -= scoreMISS;
 			StartCoroutine("showText", missed);
-			Debug.Log ("MISSED");
 		}
 
 	}
 
 	void checkKeyPress(){
 		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
+			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
-			Debug.Log("-1000 LEFT");
 			arrows[0].SendMessage("error");
 
 		}
 		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
+			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
-			Debug.Log("-1000 UP");
 			arrows[1].SendMessage("error");
 		}
 		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
+			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
-			Debug.Log("-1000 DOWN");
 			arrows[2].SendMessage("error");
 		}
 		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
+			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
-			Debug.Log("-1000 RIGHT");
 			arrows[3].SendMessage("error");
 		}
 		pressLeft = false;
@@ -269,21 +286,48 @@ public class songManager : MonoBehaviour {
 	void calculatePoint(float exact, float hit){
 		float difference = exact - hit;
 		if(difference < beforeInterval && difference >= (beforeInterval/3)*2){
-			score += scoreOK;
-			StartCoroutine("showText", ok);
-			Debug.Log(scoreOK);
+			contadorCombo++;
+			if(comboOn){
+				scoreOKCombo= scoreOK*2;
+				score += scoreOKCombo;
+				StartCoroutine("showText", ok);
+				StartCoroutine("showCombo", combo_10);
+			}
+			else{
+				score += scoreOK;				
+				StartCoroutine("showText", ok);
+			}				
+			Debug.Log("contador: "+contadorCombo);
 		}
 		else if((difference < (beforeInterval/3)*2 && difference >= (beforeInterval/3))
 		        || (difference > -afterInterval && difference <= -afterInterval/2 )){
-			score += scoreGOOD;
-			StartCoroutine("showText", good);
-			Debug.Log(scoreGOOD);
+			contadorCombo++;
+			if(comboOn){
+				scoreGOODCombo= scoreGOOD*2;
+				score += scoreGOODCombo;
+				StartCoroutine("showText", good);
+				StartCoroutine("showCombo", combo_10);
+			}
+			else{
+				score += scoreGOOD;				
+				StartCoroutine("showText", good);
+			}				
+			Debug.Log("contador: "+contadorCombo);
 		}
 		else if(difference < beforeInterval/3 && difference >= 0
 		        || difference > -afterInterval/2 && difference <= 0){
-			score += scorePERFECT;
-			StartCoroutine("showText", perfect);
-			Debug.Log(scorePERFECT);
+			contadorCombo++;
+			if(comboOn){
+				scorePERFECTCombo= scorePERFECT*2;
+				score += scorePERFECTCombo;
+				StartCoroutine("showText", perfect);
+				StartCoroutine("showCombo", combo_10);
+			}
+			else{
+				score += scorePERFECT;				
+				StartCoroutine("showText", perfect);
+			}				
+			Debug.Log("contador: "+contadorCombo);
 		}
 
 	}
@@ -294,6 +338,13 @@ public class songManager : MonoBehaviour {
 		perfect.enabled = false;
 		missed.enabled = false;
 		wrong.enabled = false;
+		t.enabled = true;
+		yield return new WaitForSeconds(0.4f);
+		t.enabled = false;
+	}
+
+	IEnumerator showCombo(Text t){
+		combo_10.enabled = false;
 		t.enabled = true;
 		yield return new WaitForSeconds(0.4f);
 		t.enabled = false;

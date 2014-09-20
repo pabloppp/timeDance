@@ -10,7 +10,6 @@ public class timeUpdate : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		time = GetComponent<Text>();
 		clipSender = GetComponent<AudioSource>();
 		lenghtSong = (int)(clipSender.clip.length);
 		time.text = ""+lenghtSong;
@@ -23,9 +22,8 @@ public class timeUpdate : MonoBehaviour {
 		if(timeLeft <= 0) time.text = "000";
 		else if(timeLeft >=100) time.text = ""+timeLeft;
 		else if(timeLeft < 100 && timeLeft >= 10) time.text = "0"+timeLeft;
-		else{ 
-			time.text = "00"+timeLeft;
-		}
+		else time.text = "00"+timeLeft;
+
  		
 	}
 }
