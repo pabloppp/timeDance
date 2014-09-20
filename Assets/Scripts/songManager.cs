@@ -27,8 +27,12 @@ public class songManager : MonoBehaviour {
 	public GameObject arrowRIGHT;
 
 	private GameObject[] arrows = new GameObject[4];
+	private GameObject[] arrowsMove = new GameObject[4];
 
-	public GameObject pointerA;
+	public GameObject arrowUP_Moves;
+	public GameObject arrowDOWN_Moves;
+	public GameObject arrowLEFT_Moves;
+	public GameObject arrowRIGHT_Moves;
 
 	public TextAsset songData;
 
@@ -68,8 +72,15 @@ public class songManager : MonoBehaviour {
 			if(s.Length > 0){
 				Debug.Log (s);
 				string[] data = s.Split(',');
-				int time = (int)(int.Parse(data[0])+songStartDataDelay);
-				notesPreSpawn.Add(time+","+data[1]);
+				int time = 0;
+				if(int.TryParse(data[0], out time)){
+					time += (int)songStartDataDelay;
+					//int time = (int)(int.Parse(data[0])+songStartDataDelay);
+					notesPreSpawn.Add(time+","+data[1]);
+				}
+				else{
+					notesPreSpawn.Add(data[0]+","+data[1]);
+				}
 			}
 		}
 
@@ -80,6 +91,11 @@ public class songManager : MonoBehaviour {
 		arrows [2] = arrowDOWN;
 		arrows [3] = arrowRIGHT;
 
+		arrowsMove [0] = arrowLEFT_Moves;
+		arrowsMove [1] = arrowUP_Moves;
+		arrowsMove [2] = arrowDOWN_Moves;
+		arrowsMove [3] = arrowRIGHT_Moves;
+
 		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;
 
 		audioSource = GetComponent<AudioSource> ();
@@ -89,14 +105,14 @@ public class songManager : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
 
+		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;	
+
 		if(!audioSource.isPlaying && Time.time*1000 > songStartDelay){
 			audioSource.Play ();
 		}
 
 		if (audioSource.isPlaying)
 						currentTime = audioSource.time * 1000; // in milliseconds
-		else
-						currentTime = Time.time;
 		//Debug.Log (currentTime);
 
 		if(notesPreSpawn.Count > 0){
@@ -112,13 +128,18 @@ public class songManager : MonoBehaviour {
 	}
 
 	void arrowSpawner(string[] data){
+		if (data [0] == "s") {
+			zArrowSpeed = int.Parse(data[1]);
+			notesPreSpawn.RemoveAt(0);
+			return;
+		}
 		int offset = int.Parse(data[0]);
 		if (currentTime >= offset - spawnPreTime) {
 			string note = notesPreSpawn[0];
 			List<GameObject> noteObjects = new List<GameObject>();
 			for(int i = 1; i<data.Length; i++){
 				int direction = int.Parse(data[i])-1;
-				GameObject newObject = (GameObject) Instantiate(pointerA, arrows[direction].transform.position+Vector3.down*zArrowSpawn, Quaternion.Euler(0,0,0));
+				GameObject newObject = (GameObject) Instantiate(arrowsMove[direction], arrows[direction].transform.position+Vector3.down*zArrowSpawn, Quaternion.Euler(0,0,0));
 				moveUp moveScript = (moveUp) newObject.GetComponent<moveUp>();
 				moveScript.setSpeed(zArrowSpeed);
 				noteObjects.Add(newObject);
@@ -133,19 +154,20 @@ public class songManager : MonoBehaviour {
 
 		string[] data = notesPostSpawn[key].Split(',');
 		int offset = int.Parse(data[0]);
-		for(int i = 0; i < 4; i++){
+		/*for(int i = 0; i < 4; i++){
 			arrows[i].renderer.enabled = true;
-		}
+		}*/
 
 		if (currentTime >= offset - beforeInterval && currentTime < offset + afterInterval) {
 			for(int i = 1; i<data.Length; i++){
 				int direction = int.Parse(data[i])-1;
-				arrows[direction].renderer.enabled = false;
+				//arrows[direction].renderer.enabled = false;
 				if(direction == 0){
 					pressLeft = true;
 					if(Input.GetKeyDown(KeyCode.LeftArrow)){
 						Debug.Log("+1000 LEFT");
 						destroySpawned(key, 0, true);
+						arrows[direction].SendMessage("success");
 					}
 
 				}
@@ -154,6 +176,7 @@ public class songManager : MonoBehaviour {
 					if(Input.GetKeyDown(KeyCode.UpArrow)){
 						Debug.Log("+1000 UP");
 						destroySpawned(key, 0, true);
+						arrows[direction].SendMessage("success");
 					}
 				}
 				if(direction == 2){
@@ -161,6 +184,7 @@ public class songManager : MonoBehaviour {
 					if(Input.GetKeyDown(KeyCode.DownArrow)){
 						Debug.Log("+1000 DOWN");
 						destroySpawned(key, 0, true);
+						arrows[direction].SendMessage("success");
 					}
 				}
 				if(direction == 3){
@@ -168,6 +192,7 @@ public class songManager : MonoBehaviour {
 					if(Input.GetKeyDown(KeyCode.RightArrow)){
 						Debug.Log("+1000 RIGHT");
 						destroySpawned(key, 0, true);
+						arrows[direction].SendMessage("success");
 					}
 				}
 			}
@@ -182,16 +207,20 @@ public class songManager : MonoBehaviour {
 	void checkKeyPress(){
 		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
 			Debug.Log("-1000 LEFT");
+			arrows[0].SendMessage("error");
 
 		}
 		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
 			Debug.Log("-1000 UP");
+			arrows[1].SendMessage("error");
 		}
 		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
 			Debug.Log("-1000 DOWN");
+			arrows[2].SendMessage("error");
 		}
 		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
 			Debug.Log("-1000 RIGHT");
+			arrows[3].SendMessage("error");
 		}
 		pressLeft = false;
 		pressUp = false;
