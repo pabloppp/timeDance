@@ -50,7 +50,7 @@ public class songManager : MonoBehaviour {
 
 	public TextAsset songData;
 
-	AudioSource audioSource;
+	public AudioSource audioSource;
 
 	bool pressLeft = false, 
 	pressUp = false, 
