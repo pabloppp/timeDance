@@ -102,13 +102,17 @@ MonoBehaviour:
   beforeInterval: 200
   afterInterval: 100
   zArrowSpawn: 10
-  zArrowSpeed: 5
+  zArrowSpeed: 3
   songStartDelay: 0
   songStartDataDelay: -200
   score: 0
+  iniciaCombo: 10
   scoreOK: 500
+  scoreOKCombo: 500
   scoreGOOD: 1000
+  scoreGOODCombo: 1000
   scorePERFECT: 2000
+  scorePERFECTCombo: 2000
   scoreMISS: 5000
   scoreWRONG: 1000
   arrowUP: {fileID: 0}
@@ -120,11 +124,13 @@ MonoBehaviour:
   perfect: {fileID: 0}
   missed: {fileID: 0}
   wrong: {fileID: 0}
+  combo_10: {fileID: 0}
   arrowUP_Moves: {fileID: 100000, guid: aa8f7501d528047b187f66819b2a1396, type: 2}
   arrowDOWN_Moves: {fileID: 100000, guid: 5b4997cffd14d45ff83bffa1c60b0ec5, type: 2}
   arrowLEFT_Moves: {fileID: 100000, guid: 55d3ec538ab79460f87dd429fe92db2d, type: 2}
   arrowRIGHT_Moves: {fileID: 100000, guid: 236aff54a6614450db52b6ad46fcf863, type: 2}
-  songData: {fileID: 4900000, guid: f314024909b0b4ccc8d21a55c28a9c63, type: 3}
+  songData: {fileID: 4900000, guid: 6fc30c4802b144d0b874b54156b142f5, type: 3}
+  audioSource: {fileID: 0}
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
