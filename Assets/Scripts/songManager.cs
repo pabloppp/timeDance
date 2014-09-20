@@ -18,6 +18,13 @@ public class songManager : MonoBehaviour {
 	private float spawnPreTime = 0;
 	public float songStartDelay = 0;
 	public float songStartDataDelay = -200;
+	public int score = 0;
+
+	public int scoreOK = 500;
+	public int scoreGOOD = 1000;
+	public int scorePERFECT = 2000;
+	public int scoreMISS = 5000;
+	public int scoreWRONG = 1000;
 
 	//Note Objects
 	
@@ -144,7 +151,7 @@ public class songManager : MonoBehaviour {
 				if(direction == 0){
 					pressLeft = true;
 					if(Input.GetKeyDown(KeyCode.LeftArrow)){
-						Debug.Log("+1000 LEFT");
+						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 					}
 
@@ -152,21 +159,21 @@ public class songManager : MonoBehaviour {
 				if(direction == 1){
 					pressUp = true;
 					if(Input.GetKeyDown(KeyCode.UpArrow)){
-						Debug.Log("+1000 UP");
+						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 					}
 				}
 				if(direction == 2){
 					pressDown = true;
 					if(Input.GetKeyDown(KeyCode.DownArrow)){
-						Debug.Log("+1000 DOWN");
+						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 					}
 				}
 				if(direction == 3){
 					pressRight = true;
 					if(Input.GetKeyDown(KeyCode.RightArrow)){
-						Debug.Log("+1000 RIGHT");
+						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 					}
 				}
@@ -174,6 +181,7 @@ public class songManager : MonoBehaviour {
 		}
 		else if (currentTime > offset + afterInterval) {
 			destroySpawned(key, 1000, false);
+			score -= scoreMISS;
 			Debug.Log ("MISSED");
 		}
 
@@ -181,16 +189,20 @@ public class songManager : MonoBehaviour {
 
 	void checkKeyPress(){
 		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
+			score -= scoreWRONG;
 			Debug.Log("-1000 LEFT");
 
 		}
 		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
+			score -= scoreWRONG;
 			Debug.Log("-1000 UP");
 		}
 		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
+			score -= scoreWRONG;
 			Debug.Log("-1000 DOWN");
 		}
 		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
+			score -= scoreWRONG;
 			Debug.Log("-1000 RIGHT");
 		}
 		pressLeft = false;
@@ -208,4 +220,22 @@ public class songManager : MonoBehaviour {
 		spawnedNotes.RemoveAt(key);
 	}
 
+	void calculatePoint(float exact, float hit){
+		float difference = exact - hit;
+		if(difference < beforeInterval && difference >= (beforeInterval/3)*2){
+			score += scoreOK;
+			Debug.Log(scoreOK);
+		}
+		else if((difference < (beforeInterval/3)*2 && difference >= (beforeInterval/3))
+		        || (difference > -afterInterval && difference <= -afterInterval/2 )){
+			score += scoreGOOD;
+			Debug.Log(scoreGOOD);
+		}
+		else if(difference < beforeInterval/3 && difference >= 0
+		        || difference > -afterInterval/2 && difference <= 0){
+			score += scorePERFECT;
+			Debug.Log(scorePERFECT);
+		}
+
+	}
 }
