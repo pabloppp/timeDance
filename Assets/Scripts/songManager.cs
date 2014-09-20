@@ -1,76 +1,211 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
+using System.IO;
+
 public class songManager : MonoBehaviour {
 
 	// Use this for initialization
-	private List<string> notes = new List<string>();
-	private List<int> offsetsPassed = new List<int>();
-	private bool playIt = false;
-	public float interval = 200;
-	public float intervalPointer = 3000;
-	private float timePassed = 0;
+	private List<string> notesPreSpawn = new List<string>();
+	private List<string> notesPostSpawn = new List<string>();
+	private List<List<GameObject>> spawnedNotes = new List<List<GameObject>>();
+	public float beforeInterval = 1000;
+	public float afterInterval = 500;
+	public float zArrowSpawn = 3;
+	public float zArrowSpeed = 1.5f; //in units/second
+	private float currentTime = 0;
+	private float spawnPreTime = 0;
+	public float songStartDelay = 0;
+	public float songStartDataDelay = -200;
 
 	//Note Objects
-	public GameObject objectA;
-	public GameObject objectB;
-	public GameObject objectC;
-	public GameObject objectD;
+	
+	public GameObject arrowUP;
+	public GameObject arrowDOWN;
+	public GameObject arrowLEFT;
+	public GameObject arrowRIGHT;
+
+	private GameObject[] arrows = new GameObject[4];
+
 	public GameObject pointerA;
 
+	public TextAsset songData;
+
+	AudioSource audioSource;
+
+	bool pressLeft = false, 
+	pressUp = false, 
+	pressDown = false, 
+	pressRight = false;
+
 	void Start () {	
-		for(int i=0; i<20; i++){
-			string s = (int)(Random.Range((i+1)*1-0.5f, (i+1)*1+0.5f))*1000+","+(int)Random.Range(1,4.999f);
-			notes.Add(s);
+
+		//Random generator -- TO AVOID
+
+		/*
+		for(int i=0; i<50; i++){
+			string s = ((int)(Random.Range((i+1)*0.5f-0.2f, (i+1)*0.5f+0.2f))*1000+2000)+","+(int)Random.Range(1,4.999f);
+			notesPreSpawn.Add(s);
 			Debug.Log(s);
 		}
+		*/
+		/*
+		int start = 2000;
+		int[][] s = {
+			new int[]{56, 1}, 
+			new int[]{56, 4}, 
+			new int[]{136, 2},
+			new int[]{304, 3},
+			new int[]{384, 2},
+			new int[]{272, 2},
+			new int[]{184, 1},
+			new int[]{56, 4},
+		};
+		*/
+		string[] lines = songData.text.Split('\n');
+		foreach (string s in lines) {
+			if(s.Length > 0){
+				Debug.Log (s);
+				string[] data = s.Split(',');
+				int time = (int)(int.Parse(data[0])+songStartDataDelay);
+				notesPreSpawn.Add(time+","+data[1]);
+			}
+		}
+
+
+
+		arrows [0] = arrowLEFT;
+		arrows [1] = arrowUP;
+		arrows [2] = arrowDOWN;
+		arrows [3] = arrowRIGHT;
+
+		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;
+
+		audioSource = GetComponent<AudioSource> ();
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		timePassed += Time.deltaTime;
-		bool a = false; bool b = false; bool c = false; bool d = false;
-		foreach(string s in notes){
-			string[] data = s.Split(',');
-			int offset = int.Parse(data[0]);
-			int key = int.Parse(data[1]);
-			if(timePassed*1000-offset > 0 && timePassed*1000-offset <= interval){
-				switch(key){
-				case 1: a = true;
-					break;
-				case 2: b = true;
-					break;
-				case 3: c = true;
-					break;
-				case 4: d = true;
-					break;				
-				}
-			}
-			if(timePassed*1000-offset > 0 && timePassed*1000-offset <= intervalPointer
-			   && !offsetsPassed.Contains(offset)){
-				offsetsPassed.Add(offset);
-				if(key == 1){
-					GameObject newObject = (GameObject) Instantiate(pointerA, objectA.transform.position+Vector3.down*3, 
-				                  Quaternion.Euler(0,0,0));
-					
-				}
-				if(key == 2){
-					GameObject newObject = (GameObject) Instantiate(pointerA, objectB.transform.position+Vector3.down*3, 
-					                                                Quaternion.Euler(0,0,0));					
-				}
-				if(key == 3){
-					GameObject newObject = (GameObject) Instantiate(pointerA, objectC.transform.position+Vector3.down*3, 
-					                                                Quaternion.Euler(0,0,0));					
-				}
-				if(key == 4){
-					GameObject newObject = (GameObject) Instantiate(pointerA, objectD.transform.position+Vector3.down*3, 
-					                                                Quaternion.Euler(0,0,0));					
-				}
-			}
-			objectA.renderer.enabled = a;
-			objectB.renderer.enabled = b;
-			objectC.renderer.enabled = c;
-			objectD.renderer.enabled = d;
-		}		
+
+		if(!audioSource.isPlaying && Time.time*1000 > songStartDelay){
+			audioSource.Play ();
+		}
+
+		if (audioSource.isPlaying)
+						currentTime = audioSource.time * 1000; // in milliseconds
+		else
+						currentTime = Time.time;
+		//Debug.Log (currentTime);
+
+		if(notesPreSpawn.Count > 0){
+			string[] data = notesPreSpawn[0].Split(',');
+			arrowSpawner(data);
+		}
+
+
+		for(int i = notesPostSpawn.Count-1; i >= 0; i--) arrowCheck(i);
+
+		checkKeyPress ();
+
 	}
+
+	void arrowSpawner(string[] data){
+		int offset = int.Parse(data[0]);
+		if (currentTime >= offset - spawnPreTime) {
+			string note = notesPreSpawn[0];
+			List<GameObject> noteObjects = new List<GameObject>();
+			for(int i = 1; i<data.Length; i++){
+				int direction = int.Parse(data[i])-1;
+				GameObject newObject = (GameObject) Instantiate(pointerA, arrows[direction].transform.position+Vector3.down*zArrowSpawn, Quaternion.Euler(0,0,0));
+				moveUp moveScript = (moveUp) newObject.GetComponent<moveUp>();
+				moveScript.setSpeed(zArrowSpeed);
+				noteObjects.Add(newObject);
+			}
+			spawnedNotes.Add(noteObjects);
+			notesPostSpawn.Add(note);
+			notesPreSpawn.RemoveAt(0);
+		}
+	}
+
+	void arrowCheck(int key)	{
+
+		string[] data = notesPostSpawn[key].Split(',');
+		int offset = int.Parse(data[0]);
+		for(int i = 0; i < 4; i++){
+			arrows[i].renderer.enabled = true;
+		}
+
+		if (currentTime >= offset - beforeInterval && currentTime < offset + afterInterval) {
+			for(int i = 1; i<data.Length; i++){
+				int direction = int.Parse(data[i])-1;
+				arrows[direction].renderer.enabled = false;
+				if(direction == 0){
+					pressLeft = true;
+					if(Input.GetKeyDown(KeyCode.LeftArrow)){
+						Debug.Log("+1000 LEFT");
+						destroySpawned(key, 0, true);
+					}
+
+				}
+				if(direction == 1){
+					pressUp = true;
+					if(Input.GetKeyDown(KeyCode.UpArrow)){
+						Debug.Log("+1000 UP");
+						destroySpawned(key, 0, true);
+					}
+				}
+				if(direction == 2){
+					pressDown = true;
+					if(Input.GetKeyDown(KeyCode.DownArrow)){
+						Debug.Log("+1000 DOWN");
+						destroySpawned(key, 0, true);
+					}
+				}
+				if(direction == 3){
+					pressRight = true;
+					if(Input.GetKeyDown(KeyCode.RightArrow)){
+						Debug.Log("+1000 RIGHT");
+						destroySpawned(key, 0, true);
+					}
+				}
+			}
+		}
+		else if (currentTime > offset + afterInterval) {
+			destroySpawned(key, 1000, false);
+			Debug.Log ("MISSED");
+		}
+
+	}
+
+	void checkKeyPress(){
+		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
+			Debug.Log("-1000 LEFT");
+
+		}
+		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
+			Debug.Log("-1000 UP");
+		}
+		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
+			Debug.Log("-1000 DOWN");
+		}
+		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
+			Debug.Log("-1000 RIGHT");
+		}
+		pressLeft = false;
+		pressUp = false;
+		pressDown = false;
+		pressRight = false;
+
+	}
+
+	void destroySpawned(int key, int time, bool fall){
+		notesPostSpawn.RemoveAt(key);
+		for(int i = 0; i < spawnedNotes[key].Count; i++){
+			spawnedNotes[key][i].GetComponent<moveUp>().kill(time, fall);
+		}
+		spawnedNotes.RemoveAt(key);
+	}
+
 }
