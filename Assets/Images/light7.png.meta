@@ -1,8 +1,8 @@
 fileFormatVersion: 2
-guid: e771cdf59d3dc1f40b92da5dc63849b9
+guid: e85ea4a715336b843acfb893ad7a0d3b
 TextureImporter:
   fileIDToRecycleName:
-    21300000: barPointsA
+    21300000: light7
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -38,7 +38,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 256
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings: []
