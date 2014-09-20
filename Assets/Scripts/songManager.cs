@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 using System.IO;
+using UnityEngine.UI;
 
 public class songManager : MonoBehaviour {
 
@@ -32,6 +33,12 @@ public class songManager : MonoBehaviour {
 	public GameObject arrowDOWN;
 	public GameObject arrowLEFT;
 	public GameObject arrowRIGHT;
+
+	public Text ok;
+	public Text good;
+	public Text perfect;
+	public Text missed;
+	public Text wrong;
 
 	private GameObject[] arrows = new GameObject[4];
 
@@ -79,17 +86,22 @@ public class songManager : MonoBehaviour {
 				notesPreSpawn.Add(time+","+data[1]);
 			}
 		}
-
-
-
 		arrows [0] = arrowLEFT;
 		arrows [1] = arrowUP;
 		arrows [2] = arrowDOWN;
 		arrows [3] = arrowRIGHT;
 
+
+
 		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;
 
 		audioSource = GetComponent<AudioSource> ();
+
+		ok.enabled = false;
+		good.enabled = false;
+		perfect.enabled = false;
+		missed.enabled = false;
+		wrong.enabled = false;
 
 	}
 	
@@ -182,6 +194,7 @@ public class songManager : MonoBehaviour {
 		else if (currentTime > offset + afterInterval) {
 			destroySpawned(key, 1000, false);
 			score -= scoreMISS;
+			StartCoroutine("showText", missed);
 			Debug.Log ("MISSED");
 		}
 
@@ -190,19 +203,23 @@ public class songManager : MonoBehaviour {
 	void checkKeyPress(){
 		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
 			score -= scoreWRONG;
+			StartCoroutine("showText", wrong);
 			Debug.Log("-1000 LEFT");
 
 		}
 		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
 			score -= scoreWRONG;
+			StartCoroutine("showText", wrong);
 			Debug.Log("-1000 UP");
 		}
 		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
 			score -= scoreWRONG;
+			StartCoroutine("showText", wrong);
 			Debug.Log("-1000 DOWN");
 		}
 		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
 			score -= scoreWRONG;
+			StartCoroutine("showText", wrong);
 			Debug.Log("-1000 RIGHT");
 		}
 		pressLeft = false;
@@ -224,18 +241,32 @@ public class songManager : MonoBehaviour {
 		float difference = exact - hit;
 		if(difference < beforeInterval && difference >= (beforeInterval/3)*2){
 			score += scoreOK;
+			StartCoroutine("showText", ok);
 			Debug.Log(scoreOK);
 		}
 		else if((difference < (beforeInterval/3)*2 && difference >= (beforeInterval/3))
 		        || (difference > -afterInterval && difference <= -afterInterval/2 )){
 			score += scoreGOOD;
+			StartCoroutine("showText", good);
 			Debug.Log(scoreGOOD);
 		}
 		else if(difference < beforeInterval/3 && difference >= 0
 		        || difference > -afterInterval/2 && difference <= 0){
 			score += scorePERFECT;
+			StartCoroutine("showText", perfect);
 			Debug.Log(scorePERFECT);
 		}
 
+	}
+
+	IEnumerator showText(Text t){
+		ok.enabled = false;
+		good.enabled = false;
+		perfect.enabled = false;
+		missed.enabled = false;
+		wrong.enabled = false;
+		t.enabled = true;
+		yield return new WaitForSeconds(0.4f);
+		t.enabled = false;
 	}
 }
