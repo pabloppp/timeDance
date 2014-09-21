@@ -8,6 +8,9 @@ app.get('/', function(req, res){
 
 var users = 0;
 
+var port = process.env.PORT || 8000;
+
+
 
 io.on('connection', function(socket){
     console.log('a user connected');
@@ -32,6 +35,6 @@ io.on('connection', function(socket){
 });
 
 
-server.listen(3000, function(){
-    console.log('listening on *:3000');
+server.listen(port, function(){
+    console.log('listening on *:'+port);
 });

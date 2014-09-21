@@ -30,7 +30,7 @@ public class teSocket : MonoBehaviour {
 	}
 
 	public void initialize(){
-		socket = new SocketIOClient.Client("http://"+ip+":3000/");
+		socket = new SocketIOClient.Client("http://"+ip+"");
 		
 		socket.On("connect", (fn) => {
 			Debug.Log ("connect - socket");
