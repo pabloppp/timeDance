@@ -115,6 +115,10 @@ MonoBehaviour:
   scorePERFECTCombo: 2000
   scoreMISS: 5000
   scoreWRONG: 1000
+  UpKey: 273
+  DownKey: 274
+  LeftKey: 276
+  RightKey: 275
   arrowUP: {fileID: 0}
   arrowDOWN: {fileID: 0}
   arrowLEFT: {fileID: 0}
@@ -131,13 +135,14 @@ MonoBehaviour:
   arrowRIGHT_Moves: {fileID: 100000, guid: 236aff54a6614450db52b6ad46fcf863, type: 2}
   songData: {fileID: 4900000, guid: 6fc30c4802b144d0b874b54156b142f5, type: 3}
   audioSource: {fileID: 0}
+  player: {fileID: 0}
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 100000}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a7510e4cca4b84f49aaeac2888d874f8, type: 3}
   m_Name: 

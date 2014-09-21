@@ -33,6 +33,11 @@ public class songManager : MonoBehaviour {
 	public int scoreMISS = 5000;
 	public int scoreWRONG = 1000;
 
+	public KeyCode UpKey = KeyCode.UpArrow;
+	public KeyCode DownKey = KeyCode.DownArrow;
+	public KeyCode LeftKey = KeyCode.LeftArrow;
+	public KeyCode RightKey = KeyCode.RightArrow;
+
 	//Note Objects
 	
 	public GameObject arrowUP;
@@ -62,7 +67,16 @@ public class songManager : MonoBehaviour {
 	bool pressLeft = false, 
 	pressUp = false, 
 	pressDown = false, 
-	pressRight = false;
+	pressRight = false,
+	startedDance = false;
+
+	public GameObject player;
+
+	public GameObject socketioObject;
+	teSocket socketio;
+
+	public bool isPlayer = true;
+	bool multiplayer = true;
 
 	void Start () {	
 
@@ -88,10 +102,13 @@ public class songManager : MonoBehaviour {
 			new int[]{56, 4},
 		};
 		*/
+
+		socketio = socketioObject.GetComponent<teSocket> ();
+
 		string[] lines = songData.text.Split('\n');
 		foreach (string s in lines) {
 			if(s.Length > 0){
-				Debug.Log (s);
+				//Debug.Log (s);
 				string[] data = s.Split(',');
 				int time = 0;
 				if(int.TryParse(data[0], out time)){
@@ -139,6 +156,11 @@ public class songManager : MonoBehaviour {
 		}
 
 		if (audioSource.isPlaying) currentTime = audioSource.time * 1000; // in milliseconds
+
+		if(audioSource.isPlaying && !startedDance){
+			player.SendMessage("danceAnimate");
+			startedDance = true;
+		}
 
 
 		if(notesPreSpawn.Count > 0){
@@ -200,35 +222,43 @@ public class songManager : MonoBehaviour {
 
 				if(direction == 0){
 					pressLeft = true;
-					if(Input.GetKeyDown(KeyCode.LeftArrow)){
+					if(Input.GetKeyDown(LeftKey)){
 						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
+						player.SendMessage("leftAnimate");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","0");
 					}
 
 				}
 				if(direction == 1){
 					pressUp = true;
-					if(Input.GetKeyDown(KeyCode.UpArrow)){
+					if(Input.GetKeyDown(UpKey)){
 						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
+						player.SendMessage("upAnimate");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","1");
 					}
 				}
 				if(direction == 2){
 					pressDown = true;
-					if(Input.GetKeyDown(KeyCode.DownArrow)){
+					if(Input.GetKeyDown(DownKey)){
 						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
+						player.SendMessage("downAnimate");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","2");
 					}
 				}
 				if(direction == 3){
 					pressRight = true;
-					if(Input.GetKeyDown(KeyCode.RightArrow)){
+					if(Input.GetKeyDown(RightKey)){
 						calculatePoint(offset, currentTime);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
+						player.SendMessage("rightAnimate");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","3");
 					}
 				}
 			}
@@ -243,30 +273,34 @@ public class songManager : MonoBehaviour {
 	}
 
 	void checkKeyPress(){
-		if(!pressLeft && Input.GetKeyDown(KeyCode.LeftArrow)){
+		if(!pressLeft && Input.GetKeyDown(LeftKey)){
 			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[0].SendMessage("error");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","0");
 
 		}
-		if(!pressUp && Input.GetKeyDown(KeyCode.UpArrow)){
+		if(!pressUp && Input.GetKeyDown(UpKey)){
 			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[1].SendMessage("error");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","1");
 		}
-		if(!pressDown && Input.GetKeyDown(KeyCode.DownArrow)){
+		if(!pressDown && Input.GetKeyDown(DownKey)){
 			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[2].SendMessage("error");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","2");
 		}
-		if(!pressRight && Input.GetKeyDown(KeyCode.RightArrow)){
+		if(!pressRight && Input.GetKeyDown(RightKey)){
 			contadorCombo = 0;
 			score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[3].SendMessage("error");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","3");
 		}
 		pressLeft = false;
 		pressUp = false;
@@ -297,7 +331,7 @@ public class songManager : MonoBehaviour {
 				score += scoreOK;				
 				StartCoroutine("showText", ok);
 			}				
-			Debug.Log("contador: "+contadorCombo);
+			//Debug.Log("contador: "+contadorCombo);
 		}
 		else if((difference < (beforeInterval/3)*2 && difference >= (beforeInterval/3))
 		        || (difference > -afterInterval && difference <= -afterInterval/2 )){
@@ -312,7 +346,7 @@ public class songManager : MonoBehaviour {
 				score += scoreGOOD;				
 				StartCoroutine("showText", good);
 			}				
-			Debug.Log("contador: "+contadorCombo);
+			//Debug.Log("contador: "+contadorCombo);
 		}
 		else if(difference < beforeInterval/3 && difference >= 0
 		        || difference > -afterInterval/2 && difference <= 0){
@@ -327,7 +361,7 @@ public class songManager : MonoBehaviour {
 				score += scorePERFECT;				
 				StartCoroutine("showText", perfect);
 			}				
-			Debug.Log("contador: "+contadorCombo);
+			//Debug.Log("contador: "+contadorCombo);
 		}
 
 	}

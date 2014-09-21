@@ -6,6 +6,7 @@ app.get('/', function(req, res){
     res.send("it works");
 });
 
+
 io.on('connection', function(socket){
     console.log('a user connected');
     socket.on('disconnect', function(){
@@ -16,7 +17,14 @@ io.on('connection', function(socket){
         console.log('message: ' + JSON.stringify(msg));
     });
 
+    socket.on('keyPressed', function(msg){
+        console.log('keyPressed: ' + msg);
+        socket.emit("keyPressed", msg);
+        //socket.broadcast.emit("keyPressed", msg);
+    });
+
 });
+
 
 server.listen(3000, function(){
     console.log('listening on *:3000');
