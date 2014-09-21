@@ -14,7 +14,8 @@ io.on('connection', function(socket){
     users++;
     console.log(users+'/2 users');
     if(users == 2){
-        socket.emit("startGame","go!");
+        console.log("READY");
+        io.sockets.emit("startGame","go!");
     }
 
     socket.on('disconnect', function(){
