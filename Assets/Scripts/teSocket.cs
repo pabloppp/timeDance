@@ -7,15 +7,21 @@ public class teSocket : MonoBehaviour {
 	SocketIOClient.Client socket;
 	bool error = false;
 	string id = "";
+	public GameObject gameFlowManager;
+	myMenuManager gameFlowManagerScript;
+
 
 	public int lag;
 
 	public GameObject onlinePlayer;
 	songManager manager;
 
+	public string ip = "localhost";
+
 	// Use this for initialization
 	void Start () {
 		manager = onlinePlayer.GetComponent<songManager> ();
+		gameFlowManagerScript = gameFlowManager.GetComponent<myMenuManager> ();
 	}
 	
 	// Update is called once per frame
@@ -24,7 +30,7 @@ public class teSocket : MonoBehaviour {
 	}
 
 	public void initialize(){
-		socket = new SocketIOClient.Client("http://localhost:3000/");
+		socket = new SocketIOClient.Client("http://"+ip+":3000/");
 		
 		socket.On("connect", (fn) => {
 			Debug.Log ("connect - socket");
@@ -51,6 +57,11 @@ public class teSocket : MonoBehaviour {
 			if(dataArray[0].Equals("2")) manager.reciveUp(millis, score);
 			if(dataArray[0].Equals("3")) manager.reciveRight(millis, score);
 		});
+
+		socket.On("startGame", (fn) => {
+			Debug.Log("Gloworbo");
+			gameFlowManagerScript.runOnline();
+		});
 		
 		socket.Error+=(sender, e) => {
 			Debug.Log("Error "+ e.Message.ToString());
@@ -59,7 +70,10 @@ public class teSocket : MonoBehaviour {
 		
 		if(!error) socket.Connect();
 	}
-	
+
+	public void disconnect(){
+		if(socket != null) socket.Close();
+	}
 
 	void OnApplicationQuit(){
 		if(socket != null) socket.Close();

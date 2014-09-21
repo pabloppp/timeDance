@@ -5,12 +5,14 @@ public class myMenuManager : MonoBehaviour {
 
 	public GameObject songController;
 	public GameObject menu;
+	public GameObject waitOnline;
+
 
 	public GameObject jackson;
 
 	public TextAsset songData;
 
-	public bool online = false;
+	public bool online = false, startOnline = false, backBool = false;
 
 	public GameObject socketioObject;
 	teSocket socketio;
@@ -21,10 +23,7 @@ public class myMenuManager : MonoBehaviour {
 	void Start () {
 		menu.transform.position = Vector3.zero;
 		audioSource = GetComponent<AudioSource> ();
-		if (online) {
-			socketio = socketioObject.GetComponent<teSocket>();
-			socketio.initialize();
-		}
+		socketio = socketioObject.GetComponent<teSocket>();
 	}
 	
 	// Update is called once per frame
@@ -37,7 +36,43 @@ public class myMenuManager : MonoBehaviour {
 	}
 
 	public void startSong(){
+		online = false;
+		GameObject.Find ("songManager 1st").SendMessage("goOffline");
+		GameObject.Find ("songManager 2nd").SendMessage("goOffline");
 		StartCoroutine("startSongCoroutine");
+	}
+
+	public void startSongOnline(){
+		online = true;
+		socketio.initialize();
+		GameObject.Find ("songManager 1st").SendMessage("goOnline");
+		GameObject.Find ("songManager 2nd").SendMessage("goOnline");
+		StartCoroutine ("waitForOnline");
+	}
+
+	public void runOnline(){
+		startOnline = true;
+		//StartCoroutine("startSongCoroutine");
+	}
+
+	public void back(){
+		backBool = true;
+	}
+
+	IEnumerator waitForOnline(){
+		menu.transform.position = Vector3.up * 30;
+		waitOnline.transform.position = Vector3.zero;
+		while(!startOnline && !backBool) yield return new WaitForSeconds(0.001f);
+		if (startOnline) {
+				Debug.Log ("RUN");
+				StartCoroutine ("startSongCoroutine");
+		}
+		else {
+			waitOnline.transform.position = Vector3.up * 30;
+			menu.transform.position = Vector3.zero;
+			backBool = false;
+			socketio.disconnect();
+		}
 	}
 
 	IEnumerator startSongCoroutine(){

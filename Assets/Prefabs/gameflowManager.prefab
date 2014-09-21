@@ -114,7 +114,10 @@ MonoBehaviour:
   songController: {fileID: 0}
   menu: {fileID: 0}
   jackson: {fileID: 0}
-  songData: {fileID: 0}
+  songData: {fileID: 4900000, guid: 71a9e4e2d58f749c899a3c35ef74770b, type: 3}
+  online: 1
+  startOnline: 0
+  socketioObject: {fileID: 0}
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1

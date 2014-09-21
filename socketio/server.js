@@ -6,21 +6,26 @@ app.get('/', function(req, res){
     res.send("it works");
 });
 
+var users = 0;
+
 
 io.on('connection', function(socket){
     console.log('a user connected');
+    users++;
+    console.log(users+'/2 users');
+    if(users == 2){
+        socket.emit("startGame","go!");
+    }
+
     socket.on('disconnect', function(){
         console.log('user disconnected');
-    });
-
-    socket.on('SEND', function(msg){
-        console.log('message: ' + JSON.stringify(msg));
+        users--;
     });
 
     socket.on('keyPressed', function(msg){
         console.log('keyPressed: ' + msg);
-        socket.emit("keyPressed", msg);
-        //socket.broadcast.emit("keyPressed", msg);
+        //socket.emit("keyPressed", msg);
+        socket.broadcast.emit("keyPressed", msg);
     });
 
 });

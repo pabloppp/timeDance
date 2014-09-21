@@ -292,7 +292,7 @@ public class songManager : MonoBehaviour {
 			}
 		}
 		else if (currentTime > offset + afterInterval) {
-			if((multiplayer && !isPlayer && currentTime > offset + afterInterval+lag) || isPlayer){
+			if((multiplayer && !isPlayer && currentTime > offset + afterInterval+lag) || !multiplayer){
 				destroySpawned(key, 1000, false);
 				contadorCombo = 0;
 				score -= scoreMISS;
@@ -437,4 +437,13 @@ public class songManager : MonoBehaviour {
 		rightKeyRecived = time;
 		score = scoreUpdate;
 	}
+
+	public void goOffline(){
+		multiplayer = false;
+	}
+
+	public void goOnline(){
+		multiplayer = true;
+	}
+
 }
