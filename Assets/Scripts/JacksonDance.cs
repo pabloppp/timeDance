@@ -22,6 +22,11 @@ public class JacksonDance : MonoBehaviour {
 	void Update () {
 	}
 
+	void startDancing(){
+		StartCoroutine ("dance");
+		animator.SetTrigger("start");
+	}
+
 	IEnumerator dance(){
 		while (playing) {
 			float seconds = Random.Range (1, 6);

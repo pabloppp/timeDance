@@ -17,19 +17,19 @@ public class songManager : MonoBehaviour {
 	public float zArrowSpeed = 1.5f; //in units/second
 	private float currentTime = 0;
 	private float spawnPreTime = 0;
-	public float songStartDelay = 0;
 	public float songStartDataDelay = -200;
 	public int score = 0;
 	private int contadorCombo = 0;
 	public int iniciaCombo = 10;
+	int lag = 0;
 	private bool comboOn = false;
 
 	public int scoreOK = 500;
-	public int scoreOKCombo = 500;
+	int scoreOKCombo = 500;
 	public int scoreGOOD = 1000;
-	public int scoreGOODCombo = 1000;
+	int scoreGOODCombo = 1000;
 	public int scorePERFECT = 2000;
-	public int scorePERFECTCombo = 2000;
+	int scorePERFECTCombo = 2000;
 	public int scoreMISS = 5000;
 	public int scoreWRONG = 1000;
 
@@ -60,9 +60,9 @@ public class songManager : MonoBehaviour {
 	public GameObject arrowLEFT_Moves;
 	public GameObject arrowRIGHT_Moves;
 
-	public TextAsset songData;
+	TextAsset songData;
 
-	public AudioSource audioSource;
+	AudioSource audioSource;
 
 	bool pressLeft = false, 
 	pressUp = false, 
@@ -72,11 +72,18 @@ public class songManager : MonoBehaviour {
 
 	public GameObject player;
 
+	GameObject songPlayer;
+
 	public GameObject socketioObject;
 	teSocket socketio;
 
 	public bool isPlayer = true;
 	bool multiplayer = true;
+
+	int upKeyRecived = -1, 
+	downKeyRecived = -1, 
+	leftKeyRecived = -1, 
+	rightKeyRecived = -1;
 
 	void Start () {	
 
@@ -104,6 +111,14 @@ public class songManager : MonoBehaviour {
 		*/
 
 		socketio = socketioObject.GetComponent<teSocket> ();
+
+		lag = socketio.lag;
+
+		songPlayer = GameObject.Find ("gameflowManager");
+		
+		songData = songPlayer.GetComponent<myMenuManager> ().songData;
+
+		multiplayer = songPlayer.GetComponent<myMenuManager> ().online;
 
 		string[] lines = songData.text.Split('\n');
 		foreach (string s in lines) {
@@ -135,7 +150,7 @@ public class songManager : MonoBehaviour {
 
 		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;
 
-		audioSource = GetComponent<AudioSource> ();
+		audioSource = songPlayer.GetComponent<AudioSource> ();
 
 		ok.enabled = false;
 		good.enabled = false;
@@ -172,14 +187,11 @@ public class songManager : MonoBehaviour {
 		checkKeyPress ();
 		checkCombo();
 
+		upKeyRecived = -1;
+		downKeyRecived = -1;
+		leftKeyRecived = -1;
+		rightKeyRecived = -1;
 		
-		
-	}
-
-	public void turnSongOn(){
-		if(!audioSource.isPlaying && Time.time*1000 > songStartDelay){
-			audioSource.Play ();
-		}
 	}
 
 	void checkCombo(){
@@ -226,85 +238,99 @@ public class songManager : MonoBehaviour {
 
 				if(direction == 0){
 					pressLeft = true;
-					if(Input.GetKeyDown(LeftKey)){
-						calculatePoint(offset, currentTime);
+					if((Input.GetKeyDown(LeftKey) && (isPlayer || !multiplayer)) || leftKeyRecived > 0){
+						if(leftKeyRecived > 0){
+							calculatePoint(offset, leftKeyRecived, false);
+						}
+						else calculatePoint(offset, currentTime, true);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
 						player.SendMessage("leftAnimate");
-						if(isPlayer && multiplayer) socketio.emit("keyPressed","0");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","0,"+currentTime+","+score);
 					}
 
 				}
 				if(direction == 1){
 					pressUp = true;
-					if(Input.GetKeyDown(UpKey)){
-						calculatePoint(offset, currentTime);
+					if((Input.GetKeyDown(UpKey) && (isPlayer || !multiplayer)) || upKeyRecived > 0){
+						if(upKeyRecived > 0){
+							calculatePoint(offset, upKeyRecived, false);
+						}
+						else calculatePoint(offset, currentTime, true);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
 						player.SendMessage("upAnimate");
-						if(isPlayer && multiplayer) socketio.emit("keyPressed","1");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","2,"+currentTime+","+score);
 					}
 				}
 				if(direction == 2){
 					pressDown = true;
-					if(Input.GetKeyDown(DownKey)){
-						calculatePoint(offset, currentTime);
+					if((Input.GetKeyDown(DownKey) && (isPlayer || !multiplayer)) || downKeyRecived > 0){
+						if(downKeyRecived > 0){
+							calculatePoint(offset, downKeyRecived, false);
+						}
+						else calculatePoint(offset, currentTime, true);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
 						player.SendMessage("downAnimate");
-						if(isPlayer && multiplayer) socketio.emit("keyPressed","2");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","1,"+currentTime+","+score);
 					}
 				}
 				if(direction == 3){
 					pressRight = true;
-					if(Input.GetKeyDown(RightKey)){
-						calculatePoint(offset, currentTime);
+					if((Input.GetKeyDown(RightKey) && (isPlayer || !multiplayer)) || rightKeyRecived > 0){
+						if(rightKeyRecived > 0){
+							calculatePoint(offset, rightKeyRecived, false);
+						}
+						else calculatePoint(offset, currentTime, true);
 						destroySpawned(key, 0, true);
 						arrows[direction].SendMessage("success");
 						player.SendMessage("rightAnimate");
-						if(isPlayer && multiplayer) socketio.emit("keyPressed","3");
+						if(isPlayer && multiplayer) socketio.emit("keyPressed","3,"+currentTime+","+score);
 					}
 				}
 			}
 		}
 		else if (currentTime > offset + afterInterval) {
-			destroySpawned(key, 1000, false);
-			contadorCombo = 0;
-			score -= scoreMISS;
-			StartCoroutine("showText", missed);
+			if((multiplayer && !isPlayer && currentTime > offset + afterInterval+lag) || isPlayer){
+				destroySpawned(key, 1000, false);
+				contadorCombo = 0;
+				score -= scoreMISS;
+				StartCoroutine("showText", missed);
+			}
 		}
 
 	}
 
 	void checkKeyPress(){
-		if(!pressLeft && Input.GetKeyDown(LeftKey)){
+		if(!pressLeft && ((Input.GetKeyDown(LeftKey) && (isPlayer || !multiplayer)) || leftKeyRecived > 0)){
 			contadorCombo = 0;
-			score -= scoreWRONG;
+			if(isPlayer || !multiplayer) score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[0].SendMessage("error");
-			if(isPlayer && multiplayer) socketio.emit("keyPressed","0");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","0,"+currentTime+","+score);
 
 		}
-		if(!pressUp && Input.GetKeyDown(UpKey)){
+		if(!pressUp && ((Input.GetKeyDown(UpKey) && (isPlayer || !multiplayer)) || upKeyRecived > 0)){
 			contadorCombo = 0;
-			score -= scoreWRONG;
+			if(isPlayer || !multiplayer) score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[1].SendMessage("error");
-			if(isPlayer && multiplayer) socketio.emit("keyPressed","1");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","1,"+currentTime+","+score);
 		}
-		if(!pressDown && Input.GetKeyDown(DownKey)){
+		if(!pressDown && ((Input.GetKeyDown(DownKey) && (isPlayer || !multiplayer)) || downKeyRecived > 0)){
 			contadorCombo = 0;
-			score -= scoreWRONG;
+			if(isPlayer || !multiplayer) score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[2].SendMessage("error");
-			if(isPlayer && multiplayer) socketio.emit("keyPressed","2");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","2,"+currentTime+","+score);
 		}
-		if(!pressRight && Input.GetKeyDown(RightKey)){
+		if(!pressRight && ((Input.GetKeyDown(RightKey) && (isPlayer || !multiplayer)) || rightKeyRecived > 0)){
 			contadorCombo = 0;
-			score -= scoreWRONG;
+			if(isPlayer || !multiplayer) score -= scoreWRONG;
 			StartCoroutine("showText", wrong);
 			arrows[3].SendMessage("error");
-			if(isPlayer && multiplayer) socketio.emit("keyPressed","3");
+			if(isPlayer && multiplayer) socketio.emit("keyPressed","3,"+currentTime+","+score);
 		}
 		pressLeft = false;
 		pressUp = false;
@@ -321,13 +347,13 @@ public class songManager : MonoBehaviour {
 		spawnedNotes.RemoveAt(key);
 	}
 
-	void calculatePoint(float exact, float hit){
+	void calculatePoint(float exact, float hit, Boolean updateScore){
 		float difference = exact - hit;
 		if(difference < beforeInterval && difference >= (beforeInterval/3)*2){
 			contadorCombo++;
 			if(comboOn){
 				scoreOKCombo= scoreOK*2;
-				score += scoreOKCombo;
+				if(updateScore) score += scoreOKCombo;
 				StartCoroutine("showText", ok);
 				StartCoroutine("showCombo", combo_10);
 			}
@@ -342,12 +368,12 @@ public class songManager : MonoBehaviour {
 			contadorCombo++;
 			if(comboOn){
 				scoreGOODCombo= scoreGOOD*2;
-				score += scoreGOODCombo;
+				if(updateScore) score += scoreGOODCombo;
 				StartCoroutine("showText", good);
 				StartCoroutine("showCombo", combo_10);
 			}
 			else{
-				score += scoreGOOD;				
+				if(updateScore) score += scoreGOOD;				
 				StartCoroutine("showText", good);
 			}				
 			//Debug.Log("contador: "+contadorCombo);
@@ -357,12 +383,12 @@ public class songManager : MonoBehaviour {
 			contadorCombo++;
 			if(comboOn){
 				scorePERFECTCombo= scorePERFECT*2;
-				score += scorePERFECTCombo;
+				if(updateScore) score += scorePERFECTCombo;
 				StartCoroutine("showText", perfect);
 				StartCoroutine("showCombo", combo_10);
 			}
 			else{
-				score += scorePERFECT;				
+				if(updateScore) score += scorePERFECT;				
 				StartCoroutine("showText", perfect);
 			}				
 			//Debug.Log("contador: "+contadorCombo);
@@ -386,5 +412,29 @@ public class songManager : MonoBehaviour {
 		t.enabled = true;
 		yield return new WaitForSeconds(0.4f);
 		t.enabled = false;
+	}
+
+	public void reciveUp(int time, int scoreUpdate){
+		Debug.Log ("keyRecived: UP "+ scoreUpdate);
+		upKeyRecived = time;
+		score = scoreUpdate;
+	}
+
+	public void reciveDown(int time, int scoreUpdate){
+		Debug.Log ("keyRecived: DOWN"+ scoreUpdate);
+		downKeyRecived = time;
+		score = scoreUpdate;
+	}
+
+	public void reciveLeft(int time, int scoreUpdate){
+		Debug.Log ("keyRecived: LEFT"+ scoreUpdate);
+		leftKeyRecived = time;
+		score = scoreUpdate;
+	}
+
+	public void reciveRight(int time, int scoreUpdate){
+		Debug.Log ("keyRecived: RIGHT"+ scoreUpdate);
+		rightKeyRecived = time;
+		score = scoreUpdate;
 	}
 }

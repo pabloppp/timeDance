@@ -7,7 +7,6 @@ public class arrowPulse : MonoBehaviour {
 	float MSPB = 431.654676f;
 	float BPS = 0;
 	bool successBool = false;
-	bool errorBool = false;
 	float shakeAmmount = 0.1f;
 	Vector3 originalPosition;
 	public Material successMaterial;

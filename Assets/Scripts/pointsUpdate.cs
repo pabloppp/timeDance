@@ -4,13 +4,12 @@ using System.Collections;
 
 
 public class pointsUpdate : MonoBehaviour {
-	GameObject songManager;
+	public GameObject songManager;
 	songManager songManagerScript;
 	Text inicial;
 	// Use this for initialization
 	void Start () {
 		inicial = GetComponent<Text>();
-		songManager = GameObject.Find("songManager");
 		songManagerScript = songManager.GetComponent<songManager>();
 	}
 	
