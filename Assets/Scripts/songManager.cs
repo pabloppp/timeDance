@@ -151,9 +151,7 @@ public class songManager : MonoBehaviour {
 
 		spawnPreTime = 1000 * zArrowSpawn / zArrowSpeed;	
 
-		if(!audioSource.isPlaying && Time.time*1000 > songStartDelay){
-			audioSource.Play ();
-		}
+		if(!audioSource.isPlaying) return;
 
 		if (audioSource.isPlaying) currentTime = audioSource.time * 1000; // in milliseconds
 
@@ -176,6 +174,12 @@ public class songManager : MonoBehaviour {
 
 		
 		
+	}
+
+	public void turnSongOn(){
+		if(!audioSource.isPlaying && Time.time*1000 > songStartDelay){
+			audioSource.Play ();
+		}
 	}
 
 	void checkCombo(){
