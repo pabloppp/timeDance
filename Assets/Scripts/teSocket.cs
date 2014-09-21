@@ -24,7 +24,7 @@ public class teSocket : MonoBehaviour {
 	}
 
 	public void initialize(){
-		socket = new SocketIOClient.Client("http://localhost:3000/");
+		socket = new SocketIOClient.Client("http://192.168.1.104:3000/");
 		
 		socket.On("connect", (fn) => {
 			Debug.Log ("connect - socket");

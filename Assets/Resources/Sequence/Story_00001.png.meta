@@ -1,8 +1,9 @@
 fileFormatVersion: 2
-guid: ee1b81d7384664b0d8c5c62a31b79053
+guid: d5d6ceb724f0a8744816ccd0d586f215
 TextureImporter:
   fileIDToRecycleName:
-    21300000: turistClose
+    21300000: story_space_2
+    21300002: Story_00001
   serializedVersion: 2
   mipmaps:
     mipMapMode: 0
@@ -38,7 +39,7 @@ TextureImporter:
   alignment: 0
   spritePivot: {x: .5, y: .5}
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 128
   alphaIsTransparency: 1
   textureType: 8
   buildTargetSettings: []

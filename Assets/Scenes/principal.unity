@@ -7491,7 +7491,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a7510e4cca4b84f49aaeac2888d874f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  lag: 100
+  lag: 0
   onlinePlayer: {fileID: 1177544114}
 --- !u!4 &1920813381
 Transform:
