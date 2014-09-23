@@ -14,7 +14,7 @@ public class myMenuManager : MonoBehaviour {
 
 	public TextAsset songData;
 
-	public bool online = false, startOnline = false, backBool = false, skipped = false;
+	public bool online = false, startOnline = false, backBool = false, skipped = false, startedSong = false;
 
 	public GameObject croud;
 	AudioSource croudSource;
@@ -48,12 +48,14 @@ public class myMenuManager : MonoBehaviour {
 		}
 		*/
 			
-		if (Input.GetKeyDown (KeyCode.Escape))
-						Application.Quit ();
+		if (Input.GetKeyDown (KeyCode.Escape)) {
+						Application.LoadLevel (Application.loadedLevel);
+						socketio.disconnect();
+				}
 
-		if (!skipped){
+		if (!skipped && startedSong){
 				if (!audioSource.isPlaying && Input.GetKeyDown (KeyCode.Space)) {
-						StopCoroutine ("conversation");
+						StopCoroutine("startSongCoroutine");
 						StartCoroutine("skipCoroutine");
 						skipped = true;
 				}
@@ -68,6 +70,7 @@ public class myMenuManager : MonoBehaviour {
 		online = false;
 		GameObject.Find ("songManager 1st").SendMessage("goOffline");
 		GameObject.Find ("songManager 2nd").SendMessage("goOffline");
+		startedSong = true;
 		StartCoroutine("startSongCoroutine");
 	}
 

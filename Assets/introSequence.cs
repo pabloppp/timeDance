@@ -37,6 +37,7 @@ public class introSequence : MonoBehaviour {
 	public GameObject text2;
 	public GameObject text3;
 
+	bool fast = true;
 
 
 
@@ -57,16 +58,18 @@ public class introSequence : MonoBehaviour {
 		text2Text.enabled = false ;
 		text3Text.enabled = false ;
 
-
+		StartCoroutine("Play");  
 
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		StartCoroutine("Play");  
-		if (Input.GetKey (KeyCode.Space))
-						Time.timeScale = 10;
-		else Time.timeScale = 1;
+
+		if(fast){
+			if (Input.GetKey (KeyCode.Space))
+							Time.timeScale = 30;
+			else Time.timeScale = 1;
+		}
 	}
 
 
@@ -76,13 +79,13 @@ public class introSequence : MonoBehaviour {
 		slide3.SetActive(true);
 		yield return new WaitForSeconds(1.2f);
 		text1Text.enabled = true ;
-		yield return new WaitForSeconds(5.2f);
+		yield return new WaitForSeconds(7.2f);
 		text1Text.transform.position = Vector3.up * 30;
 		yield return new WaitForSeconds(0.5f);
 		slide4.SetActive(true);
 		yield return new WaitForSeconds(1.0f);
 		text2Text.enabled = true ;
-		yield return new WaitForSeconds(5.5f);
+		yield return new WaitForSeconds(7.5f);
 		text2Text.transform.position = Vector3.up * 30;
 		yield return new WaitForSeconds(0.5f);
 		slide5.SetActive(true);
@@ -91,6 +94,8 @@ public class introSequence : MonoBehaviour {
 		yield return new WaitForSeconds(1.5f);
 		text3Text.enabled = true ;
 		yield return new WaitForSeconds(8.5f);
+		fast = false;
+		yield return new WaitForSeconds(0.1f);
 		Time.timeScale = 1;
 		Application.LoadLevel("principal");
 

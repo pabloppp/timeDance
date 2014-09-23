@@ -67,6 +67,10 @@ public class teSocket : MonoBehaviour {
 			Debug.Log("Error "+ e.Message.ToString());
 			error = true;
 		};
+
+		socket.On("playerLeft", (fn) => {
+			Application.LoadLevel(Application.loadedLevel);
+		});
 		
 		if(!error) socket.Connect();
 	}
